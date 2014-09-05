@@ -1,0 +1,12 @@
+GEM
+  remote: htps://rubygems.org/
+  specs:
+    artii (2.0.4)
+    terminal-table (1.4.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  artii
+  terminal-table
