@@ -2,6 +2,7 @@ GEM
   remote: htps://rubygems.org/
   specs:
     artii (2.0.4)
+    curses (1.0.1)
     terminal-table (1.4.5)
 
 PLATFORMS
@@ -9,4 +10,5 @@ PLATFORMS
 
 DEPENDENCIES
   artii
+  curses
   terminal-table

@@ -194,108 +194,206 @@ $ levenshtein_matrix saturday sunday
 # => 3
 ```
 
-
-### Algorithm:
-
-```
-def levenshtein_distance(str1, str2)
-  n = str1.length
-  m = str2.length
-
-  d = (0..m).to_a
-
-  str1.each_char.each_with_index do |char1,i|
-    e = i+1
-    str2.each_char.each_with_index do |char2, j|
-
-      cost = (char1 == char2) ? 0 : 1
-      x = [
-           d[j+1] + 1, # insertion
-           e + 1,      # deletion
-           d[j] + cost # substitution
-          ].min
-      d[j] = e
-      e = x
-    end
-
-    d[m] = x
-  end
-
-  return x
-end
-```
-
-```
-doh
-
-
-               AAA                                           tttt           !!!
-              A:::A                                       ttt:::t          !!:!!
-             A:::::A                                      t:::::t          !:::!
-            A:::::::A                                     t:::::t          !:::!
-           A:::::::::A          rrrrr   rrrrrrrrr   ttttttt:::::ttttttt    !:::!
-          A:::::A:::::A         r::::rrr:::::::::r  t:::::::::::::::::t    !:::!
-         A:::::A A:::::A        r:::::::::::::::::r t:::::::::::::::::t    !:::!
-        A:::::A   A:::::A       rr::::::rrrrr::::::rtttttt:::::::tttttt    !:::!
-       A:::::A     A:::::A       r:::::r     r:::::r      t:::::t          !:::!
-      A:::::AAAAAAAAA:::::A      r:::::r     rrrrrrr      t:::::t          !:::!
-     A:::::::::::::::::::::A     r:::::r                  t:::::t          !!:!!
-    A:::::AAAAAAAAAAAAA:::::A    r:::::r                  t:::::t    tttttt !!!
-   A:::::A             A:::::A   r:::::r                  t::::::tttt:::::t
-  A:::::A               A:::::A  r:::::r                  tt::::::::::::::t !!!
- A:::::A                 A:::::A r:::::r                    tt:::::::::::tt!!:!!
-AAAAAAA                   AAAAAAArrrrrrr                      ttttttttttt   !!!
-```
+If we wanted to change the word `sunday` to a blank string `""` the matrix would look like this:
 
 
 ```
-colossal
-       d8888         888    888
-      d88888         888    888
-     d88P888         888    888
-    d88P 888 888d888 888888 888
-   d88P  888 888P"   888    888
-  d88P   888 888     888    Y8P
- d8888888888 888     Y88b.   "
-d88P     888 888      "Y888 888
++---+---+
+|   |   |
++---+---+
+|   | 0 |
++---+---+
+| S | 1 |
++---+---+
+| U | 2 |
++---+---+
+| N | 3 |
++---+---+
+| D | 4 |
++---+---+
+| A | 5 |
++---+---+
+| Y | 6 |
++---+---+
 ```
 
-```
-roman
-      .o.                    .   .o.
-     .888.                 .o8   888
-    .8"888.     oooo d8b .o888oo 888
-   .8' `888.    `888""8P   888   Y8P
-  .88ooo8888.    888       888   `8'
- .8'     `888.   888       888 . .o.
-o88o     o8888o d888b      "888" Y8P
-```
-
-
-```
-alligator2
-    :::     ::::::::: ::::::::::: :::
-  :+: :+:   :+:    :+:    :+:     :+:
- +:+   +:+  +:+    +:+    +:+     +:+
-+#++:++#++: +#++:++#:     +#+     +#+
-+#+     +#+ +#+    +#+    +#+     +#+
-#+#     #+# #+#    #+#    #+#
-###     ### ###    ###    ###     ###
-```
-
+It would take 6 deletions to turn `sunday` into `""`. Similarly with saturday.
 
 
 ```
-broadway
-
-         .8.          8 888888888o. 8888888 8888888888
-        .888.         8 8888    `88.      8 8888
-       :88888.        8 8888     `88      8 8888
-      . `88888.       8 8888     ,88      8 8888
-     .8. `88888.      8 8888.   ,88'      8 8888
-    .8`8. `88888.     8 888888888P'       8 8888
-   .8' `8. `88888.    8 8888`8b           8 8888
-  .8'   `8. `88888.   8 8888 `8b.         8 8888
- .888888888. `88888.  8 8888   `8b.       8 8888
-.8'       `8. `88888. 8 8888     `88.     8 8888
++---+---+---+---+---+---+---+---+---+---+
+|   |   | S | A | T | U | R | D | A | Y |
++---+---+---+---+---+---+---+---+---+---+
+|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
++---+---+---+---+---+---+---+---+---+---+
 ```
+
+It would take 8 deletions to turn `saturday` into `""`. Now we can add one character at a time to see how the rest of the algorithm will work.
+
+
+### Skip - Step
+
+To turn `s` into `saturday` we can see we don't need to do anything for the first character since s matches s, we can skip the step:
+
+
+```
++---+---+---+
+|   |   | S |
++---+---+---+
+|   | 0 | 1 |
++---+---+---+
+| S | 1 | 0 |
++---+---+---+
+```
+
+This skip will cost the same thing as if we were changing the previous character `""` (blank), to the prev target character (also blank)
+
+```
+row_index = 1
+column_index = 1
+matrix[row_index - 1][column_index - 1]
+# => 0
+```
+
+### Insertion - Step
+
+Now we add the next target letter. To change `s` to `sa` we need to perform an insertion.
+
+```
++---+---+---+---+
+|   |   | S | A |
++---+---+---+---+
+|   | 0 | 1 | 2 |
++---+---+---+---+
+| S | 1 | 0 |   |
++---+---+---+---+
+```
+
+
+Another way to look at an insertion is that it will cost the same as if we were targeting `s` instead of `sa` plus one. We can calculate the cost for an insertion by looking at the same row, previous column then adding one.
+
+```
+row_index = 1
+column_index = 2
+matrix[row_index][column_index - 1] + 1
+# => 1
+```
+
+
+We continue with insertions for the rest of the row:
+
+
+```
++---+---+---+---+---+---+---+---+---+---+
+|   |   | S | A | T | U | R | D | A | Y |
++---+---+---+---+---+---+---+---+---+---+
+|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
++---+---+---+---+---+---+---+---+---+---+
+| S | 1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
++---+---+---+---+---+---+---+---+---+---+
+```
+
+So the total cost of changing `s` into `saturday` would be `7`. Next character, let's change `su` into `sa`
+
+
+
+
+#### Deletion
+
+
+Intellectually we can see turning `su` into `s` would take 1 change, a deletion how would we calculate the cost for a deletion?
+
+```
++---+---+---+
+|   |   | S |
++---+---+---+
+|   | 0 | 1 |
++---+---+---+
+| S | 1 | 0 |
++---+---+---+
+| U | 2 |   |
++---+---+---+
+```
+
+
+If we delete `u` then the cost of changing `su` into `s` is the same as changing `s` into `s` + 1 (to account for the deletion action). We already have this information stored in our matrix. We need to get the value of the same column but the previous row and add one to it.
+
+```
+row_index = 2
+column_index = 1
+matrix[row_index - 1, column_index] + 1
+# => 1
+```
+
+The cost to change `su` to `s` would be 1 if we delete `u`.
+
+
+## Substitution
+
+To change `su` into `sa` we can substitute the `u` for an `a`
+
+```
++---+---+---+---+
+|   |   | S | A |
++---+---+---+---+
+|   | 0 | 1 | 2 |
++---+---+---+---+
+| S | 1 | 0 | 1 |
++---+---+---+---+
+| U | 2 | 1 |   |
++---+---+---+---+
+```
+
+If we are substituting a character, the cost would be the same as the previous string (not including current character) plus 1. This cost is stored in the previous row and previous column.
+
+```
+row_index = 2
+column_index = 3
+matrix[row_index - 1][column_index - 1]
+# => 1
+```
+
+
+## Algorithm
+
+We can now calculate the cost for a deletion, substitution, and insertion. If we calculate all three, the best choice will be the lowest value. We can iterate over the entire matrix until we have calculated every value:
+
+
+```
++---+---+---+---+---+---+---+---+---+---+
+|   |   | S | A | T | U | R | D | A | Y |
++---+---+---+---+---+---+---+---+---+---+
+|   | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
++---+---+---+---+---+---+---+---+---+---+
+| S | 1 | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
++---+---+---+---+---+---+---+---+---+---+
+| U | 2 | 1 | 1 | 2 | 2 | 3 | 4 | 5 | 6 |
++---+---+---+---+---+---+---+---+---+---+
+| N | 3 | 2 | 2 | 2 | 3 | 3 | 4 | 5 | 6 |
++---+---+---+---+---+---+---+---+---+---+
+| D | 4 | 3 | 3 | 3 | 3 | 4 | 3 | 4 | 5 |
++---+---+---+---+---+---+---+---+---+---+
+| A | 5 | 4 | 3 | 4 | 4 | 4 | 4 | 3 | 4 |
++---+---+---+---+---+---+---+---+---+---+
+| Y | 6 | 5 | 4 | 4 | 5 | 5 | 5 | 4 | 3 |
++---+---+---+---+---+---+---+---+---+---+
+```
+
+To get the cost of changing any string to another string, we look at
+
+```
+string1 = "sunday"
+string2 = "saturday"
+matrix[string1.length][string2.length]
+# => 3
+```
+
+The neat thing is we don't have to re-calculate any substrings. For example
+
+```
+string1 = "sun"
+string2 = "sat"
+matrix[string1.length][string2.length]
+# => 2
+```
+

@@ -6,47 +6,40 @@ require 'terminal-table'
 module Levenshtein
   def self.distance(str1, str2, options = {})
     each_step = options[:each_step]
-    s = str1
-    t = str2
-    n = s.length
-    m = t.length
-    max = n/2
-
-    d = (0..m).to_a
-    x = nil
-
     matrix = []
+    matrix[0] = (0..str2.length).to_a
 
-    str1.each_char.each_with_index do |char1,i|
-      e = i+1
-      matrix[i] = []
-      str2.each_char.each_with_index do |char2, j|
-
-        cost = (char1 == char2) ? 0 : 1
-        puts "cost: #{cost}"
-        puts "j: #{j}"
-        puts "i: #{i}"
-        puts "d.inspect: #{d.inspect}"
-        puts "d[j+1] + 1: #{d[j+1] + 1}"
-        puts "e + 1: #{e + 1}"
-        puts "d[j] + cost: #{d[j] + cost}"
-        x = [
-             d[j+1] + 1, # insertion
-             e + 1,      # deletion
-             d[j] + cost # substitution
-            ].min
-        d[j] = e
-        e = x
-        matrix[i][j] = x
-        each_step.call(matrix) if each_step
-      end
-
-      d[m] = x
+    0.upto(str1.length).each do |i|
+      matrix[i] ||= []
+      matrix[i][0] = i
     end
 
-    return x
+
+    str1.each_char.each_with_index do |char1,i|
+      str2.each_char.each_with_index do |char2, j|
+        if char1 == char2
+          puts ["skip", matrix[i][j]].inspect
+          matrix[i + 1 ][j + 1 ] = matrix[i][j]
+        else
+           actions = {
+              deletion:     matrix[i][j +1 ] + 1,
+              insert:       matrix[i + 1][j] + 1,
+              substitution: matrix[i][j]     + 1
+            }
+            action = actions.sort {|(k,v), (k2, v2)| v <=> v2 }.first
+            puts action.inspect
+            matrix[i + 1 ][j + 1 ] = action.last
+        end
+        each_step.call(matrix) if each_step
+      end
+    end
+
+    puts matrix.inspect
+    return matrix[str1.length][str2.length]
   end
 end
+
+
 
 raise "Must provide two arguments" unless ARGV.size >= 2
 
@@ -54,16 +47,19 @@ target   = ARGV.shift
 provided = ARGV.shift
 
 
+
+require "curses"
+
 class LevenDisplay
+  include Curses
 
   def initialize(target, provided)
-    @target   = target.upcase.each_char.map(&:to_s)
+    @target   = [nil] + target.upcase.each_char.map(&:to_s)
     @provided = provided.upcase.each_char.map(&:to_s)
     @artii    = Artii::Base.new font: 'colossal'
   end
 
   def clear
-    puts "CLEARING ==========================="
   end
 
   def asciify(txt)
@@ -72,22 +68,21 @@ class LevenDisplay
 
 
   def matrix(matrix)
-    provided = @provided.dup
+    provided = [nil] + @provided.dup
     table = Terminal::Table.new do |t|
       matrix.each_with_index do |row, i|
 
         if matrix.size - 1 == i
           # last iteration
           last_char = matrix[i].last
-          t << ([provided.shift] + matrix[i])#.map {|x| asciify(x) }
+          t << ([provided.shift] + matrix[i])
         else
-          t << ([provided.shift] + matrix[i])#.map {|x| asciify(x) }
+          t << ([provided.shift] + matrix[i])
           t << :separator
         end
       end
     end
-    # table.style    = {width: 40}
-    table.headings = [""] + @target#.map {|x| asciify(x) }
+    table.headings = [nil] + @target
     table.align_column(0, :left)
 
     puts table
@@ -100,7 +95,6 @@ each_step = Proc.new do |m|
   display.clear
   display.matrix(m)
   puts ""
-  puts display.asciify("Cost: ") + display.asciify(m.last.last)
   gets
 end
 
