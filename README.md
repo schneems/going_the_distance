@@ -20,7 +20,7 @@ $ ruby lib/dirty_distance.rb far foo
 
 This is very quick and requires 0(n) comparisons (only iterates over first string, however it does not take into account every way possible to modify a word. In addition to changing letters, we can also delete and insert letters.
 
-For example the with this algorithm against `saturday and `sunday` you would expect a small number, they both start with `s` and have similar substrings `day` but:
+For example the with this algorithm against `saturday` and `sunday` you would expect a small number, they both start with `s` and have similar substrings `day` but:
 
 ```
 $ ruby lib/dirty_distance.rb saturday sunday
