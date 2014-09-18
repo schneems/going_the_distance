@@ -7,22 +7,21 @@ module Levenshtein
   def self.distance(str1, str2, options = {})
     each_step = options[:each_step]
     matrix = []
-    matrix[0] = (0..str2.length).to_a
+    matrix[0] = (0..str1.length).to_a
 
-    0.upto(str1.length).each do |i|
+    0.upto(str2.length).each do |i|
       matrix[i] ||= []
       matrix[i][0] = i
     end
 
-
-    str1.each_char.each_with_index do |char1,i|
-      str2.each_char.each_with_index do |char2, j|
+    str2.each_char.each_with_index do |char1,i|
+      str1.each_char.each_with_index do |char2, j|
         if char1 == char2
-          puts ["skip", matrix[i][j]].inspect
+          puts [:skip, matrix[i][j]].inspect
           matrix[i + 1 ][j + 1 ] = matrix[i][j]
         else
            actions = {
-              deletion:     matrix[i][j +1 ] + 1,
+              deletion:     matrix[i][j + 1] + 1,
               insert:       matrix[i + 1][j] + 1,
               substitution: matrix[i][j]     + 1
             }
@@ -34,8 +33,7 @@ module Levenshtein
       end
     end
 
-    puts matrix.inspect
-    return matrix[str1.length][str2.length]
+    return matrix[str2.length][str1.length]
   end
 end
 
@@ -45,8 +43,6 @@ raise "Must provide two arguments" unless ARGV.size >= 2
 
 target   = ARGV.shift
 provided = ARGV.shift
-
-
 
 require "curses"
 
@@ -100,7 +96,7 @@ end
 
 
 
-cost =  Levenshtein.distance(provided, target, each_step: each_step)
+cost =  Levenshtein.distance(target, provided, each_step: each_step)
 
 puts display.asciify("Final Cost: #{cost}")
 
