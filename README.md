@@ -2,6 +2,26 @@
 
 This contains scripts that do various distance calculations.
 
+## Quicklinks
+
+This article and code was built on the backs of giants for more about levenshtein distance check out
+
+- [Wikipedia: Levenshtein Distance](http://en.wikipedia.org/wiki/Levenshtein_distance)
+- [Rosetta code](http://rosettacode.org/wiki/Levenshtein_distance)
+- [Peter Norvig: How Google Spell check works](http://norvig.com/spell-correct.html)
+- [Hamming Distance](http://en.wikipedia.org/wiki/Hamming_distance)
+- [Suggest Rails Generator Names PR](https://github.com/rails/rails/pull/15497)
+- [did_you_mean gem](http://www.yukinishijima.net/2014/10/21/did-you-mean-experience-in-ruby.html)
+
+Further reading on edit distance:
+
+- [Faster Edit distance (using tries)](http://blog.faroo.com/2012/06/07/improved-edit-distance-based-spelling-correction/)
+- [Jaro-Winkler Distance](https://github.com/tonytonyjan/jaro_winkler)
+
+If you want to learn more about algorithms, check out:
+
+- [Kahn Academy Algorithms](https://www.khanacademy.org/computing/computer-science/algorithms)
+
 ## Word Distance
 
 Calculate "distance" between two words where distance is the "cost" it would take to change word B into word A
