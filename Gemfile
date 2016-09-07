@@ -1,4 +1,4 @@
-source 'htps://rubygems.org'
+source 'https://rubygems.org'
 
 gem 'artii'
 gem 'terminal-table'
